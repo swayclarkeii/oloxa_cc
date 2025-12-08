@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod:*)",
+      "Bash(pip3 install:*)",
+      "Bash(python3:*)",
+      "Bash(source:*)",
+      "Bash(pip install:*)",
+      "Bash(/Library/Frameworks/Python.framework/Versions/3.12/bin/python3:*)",
+      "Bash(launchctl unload:*)",
+      "Bash(launchctl load:*)",
+      "Bash(pkill:*)",
+      "Bash(cat:*)",
+      "Bash(/Users/swayclarke/coding_stuff/oloxa_cc/dictation/venv/bin/python3:*)",
+      "Bash(/Users/swayclarke/coding_stuff/oloxa_cc/dictation/start_dictation.sh:*)",
+      "Bash(/Library/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python:*)",
+      "Bash(wc:*)",
+      "Bash(~/.zshrc)",
+      "Bash(pgrep:*)",
+      "Bash(tail:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
