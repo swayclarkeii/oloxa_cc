@@ -1,8 +1,14 @@
 #!/bin/bash
 
-# Set environment for venv
-export PYTHONPATH="/Users/swayclarke/coding_stuff/oloxa_cc/dictation/venv/lib/python3.12/site-packages"
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Set environment for venv (auto-detect Python version)
+VENV_SITE_PACKAGES=$(find "$SCRIPT_DIR/venv/lib" -name "site-packages" -type d 2>/dev/null | head -1)
+if [ -n "$VENV_SITE_PACKAGES" ]; then
+    export PYTHONPATH="$VENV_SITE_PACKAGES:$PYTHONPATH"
+fi
 
 # Run the v2 dictation service with notifications and menu bar
 # -u flag = unbuffered output so logs appear in real-time
-exec /Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12 -u /Users/swayclarke/coding_stuff/oloxa_cc/dictation/dictation_service_v2.py
+exec "$SCRIPT_DIR/venv/bin/python3" -u "$SCRIPT_DIR/dictation_service_v2.py"

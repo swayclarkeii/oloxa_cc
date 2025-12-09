@@ -38,7 +38,7 @@ if [ $? -eq 0 ]; then
     echo "  ps aux | grep dictation_service"
     echo ""
     echo "To view logs:"
-    echo "  tail -f ~/coding_stuff/oloxa_cc/dictation/dictation.log"
+    echo "  tail -f \$(dirname \$0)/dictation.log"
     echo ""
     echo "To stop the service:"
     echo "  launchctl unload ~/Library/LaunchAgents/com.dictation.service.plist"

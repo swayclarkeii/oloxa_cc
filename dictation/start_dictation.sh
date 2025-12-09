@@ -1,7 +1,13 @@
 #!/bin/bash
 
-# Set PYTHONPATH to use venv's site-packages
-export PYTHONPATH="/Users/swayclarke/coding_stuff/oloxa_cc/dictation/venv/lib/python3.12/site-packages:$PYTHONPATH"
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Use the venv Python with explicit path
-exec /Users/swayclarke/coding_stuff/oloxa_cc/dictation/venv/bin/python3 /Users/swayclarke/coding_stuff/oloxa_cc/dictation/dictation_service.py
+# Set PYTHONPATH to use venv's site-packages (auto-detect Python version)
+VENV_SITE_PACKAGES=$(find "$SCRIPT_DIR/venv/lib" -name "site-packages" -type d 2>/dev/null | head -1)
+if [ -n "$VENV_SITE_PACKAGES" ]; then
+    export PYTHONPATH="$VENV_SITE_PACKAGES:$PYTHONPATH"
+fi
+
+# Use the venv Python with dynamic path
+exec "$SCRIPT_DIR/venv/bin/python3" "$SCRIPT_DIR/dictation_service.py"
