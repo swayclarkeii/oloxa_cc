@@ -4,21 +4,47 @@ A system-wide dictation tool that transcribes and cleans your speech, then paste
 
 ## Quick Start
 
-### 1. Install Dependencies
+### 1. Navigate to this folder
 
-Open Terminal and navigate to this folder:
 ```bash
-cd /Users/swayclarke/coding_stuff/oloxa_cc/dictation
+cd path/to/dictation
 ```
 
-Run the install script:
+### 2. Set up your API key
+
 ```bash
-./install.sh
+# Copy the example file
+cp .env.example .env
+
+# Edit and add your OpenAI API key
+nano .env
+# Or open with any text editor
 ```
 
-### 2. Start the Service
+Your `.env` file should contain:
+```
+OPENAI_API_KEY=sk-your-actual-api-key-here
+```
+
+Get an API key at: https://platform.openai.com/api-keys
+
+### 3. Create a virtual environment and install dependencies
 
 ```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### 4. Start the Service
+
+```bash
+./start_dictation.sh
+```
+
+Or manually:
+```bash
+source venv/bin/activate
 python3 dictation_service.py
 ```
 
@@ -29,20 +55,20 @@ Whisper model 'base' loaded successfully
 🎙️  Dictation Service Started
 Controls:
   • Press Control twice quickly → Start recording
-  • Press Enter → Stop recording and transcribe
+  • Press Control once → Stop recording and transcribe
 ```
 
-### 3. Use It!
+### 5. Use It!
 
 1. Put your cursor anywhere (Cursor IDE, Terminal, browser, etc.)
 2. **Press Control key twice quickly** → Recording starts
 3. Speak your text
-4. **Press Enter** → Recording stops, transcribes, cleans, and pastes
+4. **Press Control once** → Recording stops, transcribes, cleans, and pastes
 
 ## How It Works
 
 ```
-Press Ctrl twice → Record → Press Enter → Whisper transcribes →
+Press Ctrl twice → Record → Press Ctrl once → Whisper transcribes →
 OpenAI cleans → Auto-paste at cursor
 ```
 
@@ -50,10 +76,10 @@ OpenAI cleans → Auto-paste at cursor
 
 ## Running in Background
 
-To keep it running without the Terminal window:
+Double-click `start_dictation.command` to run in background, or:
 
 ```bash
-nohup python3 dictation_service.py > dictation.log 2>&1 &
+./launch_service.sh
 ```
 
 Check if it's running:
@@ -70,13 +96,17 @@ pkill -f dictation_service.py
 
 ### Method 1: Create a LaunchAgent
 
-1. Create a plist file:
+1. Create the LaunchAgents directory:
 ```bash
 mkdir -p ~/Library/LaunchAgents
+```
+
+2. Create a plist file - replace `YOUR_PATH` with your actual installation path:
+```bash
 nano ~/Library/LaunchAgents/com.dictation.service.plist
 ```
 
-2. Paste this content:
+3. Paste this content (update paths):
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -86,84 +116,73 @@ nano ~/Library/LaunchAgents/com.dictation.service.plist
     <string>com.dictation.service</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/usr/local/bin/python3</string>
-        <string>/Users/swayclarke/coding_stuff/oloxa_cc/dictation/dictation_service.py</string>
+        <string>YOUR_PATH/dictation/venv/bin/python3</string>
+        <string>YOUR_PATH/dictation/dictation_service.py</string>
     </array>
+    <key>WorkingDirectory</key>
+    <string>YOUR_PATH/dictation</string>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>
     <true/>
     <key>StandardOutPath</key>
-    <string>/Users/swayclarke/coding_stuff/oloxa_cc/dictation/dictation.log</string>
+    <string>YOUR_PATH/dictation/dictation.log</string>
     <key>StandardErrorPath</key>
-    <string>/Users/swayclarke/coding_stuff/oloxa_cc/dictation/dictation_error.log</string>
+    <string>YOUR_PATH/dictation/dictation_error.log</string>
 </dict>
 </plist>
 ```
 
-3. Load the service:
+4. Load the service:
 ```bash
 launchctl load ~/Library/LaunchAgents/com.dictation.service.plist
 ```
 
-4. Unload if needed:
+5. Unload if needed:
 ```bash
 launchctl unload ~/Library/LaunchAgents/com.dictation.service.plist
 ```
 
 ### Method 2: Add to Login Items
 
-1. Create a simple launcher script:
-```bash
-nano ~/start_dictation.sh
-```
-
-2. Add:
-```bash
-#!/bin/bash
-cd /Users/swayclarke/coding_stuff/oloxa_cc/dictation
-python3 dictation_service.py
-```
-
-3. Make executable:
-```bash
-chmod +x ~/start_dictation.sh
-```
-
-4. Add to Login Items:
-   - System Settings → General → Login Items
-   - Click "+" and add `start_dictation.sh`
+1. System Settings → General → Login Items
+2. Click "+" and add `start_dictation.command`
 
 ## Customization
 
-### Change Hotkey
-
-Edit [dictation_service.py](dictation_service.py:59):
-
-```python
-# Current: Double Control press
-# To change, modify the on_press method around line 190
-```
-
 ### Change Whisper Model
 
-Edit [dictation_service.py](dictation_service.py:37):
+Edit `dictation_service.py`:
 
 ```python
 WHISPER_MODEL_SIZE = "base"  # Options: tiny, base, small, medium, large
 ```
 
-Larger models = more accurate but slower
+| Model  | Speed    | Accuracy  |
+|--------|----------|-----------|
+| tiny   | Fastest  | Good      |
+| base   | Fast     | Better    |
+| small  | Medium   | Great     |
+| medium | Slow     | Excellent |
+| large  | Slowest  | Best      |
 
 ### Modify Cleaning Prompt
 
-Edit the `CLEANING_PROMPT` variable starting at [dictation_service.py](dictation_service.py:40)
+Edit the `CLEANING_PROMPT` variable in `dictation_service.py`
 
 ## Troubleshooting
 
+### "OPENAI_API_KEY not found"
+Make sure you've created the `.env` file:
+```bash
+cp .env.example .env
+# Edit .env and add your API key
+```
+
 ### "No module named 'sounddevice'"
 ```bash
-pip3 install sounddevice soundfile numpy pynput openai-whisper openai rumps
+source venv/bin/activate
+pip install -r requirements.txt
 ```
 
 ### "Permission denied" when recording
@@ -187,37 +206,30 @@ tail -f dictation.log
 tail -f dictation_error.log
 ```
 
-## Performance Tips
-
-1. **Faster transcription**: Use `tiny` or `base` model
-2. **Better accuracy**: Use `medium` or `large` model
-3. **Network issues**: Service works 100% offline except for cleaning (OpenAI API)
-4. **Battery saving**: Use smaller models or only run when needed
-
 ## Files
 
-- `dictation_service.py` - Main service script
-- `requirements.txt` - Python dependencies
-- `install.sh` - Installation script
-- `SETUP_GUIDE.md` - This file
-- `README.md` - Original transcription script docs
+| File | Description |
+|------|-------------|
+| `dictation_service.py` | Main service script |
+| `.env.example` | Template for API key configuration |
+| `.env` | Your API key (create from .env.example) |
+| `requirements.txt` | Python dependencies |
+| `install.sh` | Installation script |
+| `start_dictation.sh` | Start script for terminal |
+| `start_dictation.command` | Double-click launcher |
+| `launch_service.sh` | Background launcher |
+| `SETUP_GUIDE.md` | This file |
 
-## Security Note
+## Security
 
-Your OpenAI API key is stored in the `dictation_service.py` file. Keep this file private and don't share it publicly.
-
-To use environment variable instead:
-1. Remove the API key from the script
-2. Add to your `~/.zshrc` or `~/.bash_profile`:
-```bash
-export OPENAI_API_KEY="your-key-here"
-```
-3. Reload: `source ~/.zshrc`
+- Your API key is stored in `.env` which is gitignored (never committed)
+- Never share your `.env` file
+- The `.env.example` file is safe to share (contains no real keys)
 
 ## Support
 
 If something isn't working:
 1. Check Terminal output for error messages
-2. Verify all dependencies are installed: `pip3 list`
-3. Test Whisper separately with the original `transcribe_audio.py`
+2. Verify `.env` file exists with valid API key
+3. Verify all dependencies are installed: `pip list`
 4. Check microphone permissions in System Settings
